@@ -1,27 +1,44 @@
-const express = require('express');
+const express = require("express");
 const router = express.Router();
-const Event = require('../models/Event');
-const auth = require('../middleware/auth');
+const Event = require("../models/Event");
 
-// Create event (User)
-router.post('/create', auth, async (req, res) => {
+// ✅ correct import
+const { verifyToken } = require("../middleware/auth");
+
+// =============================
+// CREATE EVENT
+// =============================
+router.post("/create", verifyToken, async (req, res) => {
   try {
     const event = new Event({
       ...req.body,
-      user: req.user.id
+      user: req.user._id, // ⚠️ id nahi, _id use kar
     });
+
     await event.save();
-    res.status(201).json(event);
+
+    res.status(201).json({
+      success: true,
+      data: event,
+    });
+
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 });
 
-// Get user's events
-router.get('/my-events', auth, async (req, res) => {
+// =============================
+// GET USER EVENTS
+// =============================
+router.get("/my-events", verifyToken, async (req, res) => {
   try {
-    const events = await Event.find({ user: req.user.id });
-    res.json(events);
+    const events = await Event.find({ user: req.user._id });
+
+    res.json({
+      success: true,
+      data: events,
+    });
+
   } catch (err) {
     res.status(500).json({ error: err.message });
   }

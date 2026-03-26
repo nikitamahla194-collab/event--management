@@ -1,40 +1,68 @@
 const jwt = require("jsonwebtoken");
 const User = require("../models/User");
 
-// Verify JWT Token
+// =============================
+// VERIFY TOKEN MIDDLEWARE
+// =============================
 const verifyToken = async (req, res, next) => {
-  try {
-    const token = req.headers.authorization?.split(" ")[1];
-    
+  try {   
+    // token header se lena
+    const token = req.header("Authorization");
+
     if (!token) {
       return res.status(401).json({ message: "No token provided" });
     }
-    
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+
+    // Bearer TOKEN format handle
+    const actualToken = token.startsWith("Bearer ")
+      ? token.split(" ")[1]
+      : token;
+
+    // verify JWT
+    const decoded = jwt.verify(actualToken, process.env.JWT_SECRET);
+
+    // user find
     const user = await User.findById(decoded.userId).select("-password");
-    
+
     if (!user) {
       return res.status(401).json({ message: "User not found" });
     }
-    
+
+    // req me user set
     req.user = user;
-    next();
+
+    next(); // ✅ VERY IMPORTANT
+
   } catch (error) {
+    console.error(error);
     return res.status(401).json({ message: "Invalid token" });
   }
 };
 
-// Check if user is admin
+// =============================
+// ADMIN CHECK
+// =============================
 const isAdmin = (req, res, next) => {
-  if (req.user.role !== "admin") {
+  if (!req.user || req.user.role !== "admin") {
     return res.status(403).json({ message: "Admin access required" });
   }
   next();
 };
 
-// Generate JWT Token
+// =============================
+// GENERATE TOKEN
+// =============================
 const generateToken = (userId) => {
-  return jwt.sign({ userId }, process.env.JWT_SECRET, { expiresIn: "7d" });
+  return jwt.sign({ userId }, process.env.JWT_SECRET, {
+    expiresIn: "7d",
+  });
 };
 
-module.exports = { verifyToken, isAdmin, generateToken };
+// =============================
+// EXPORTS
+// =============================
+module.exports = {
+  verifyToken,
+  isAdmin,
+  generateToken,
+};   
