@@ -5,6 +5,7 @@ const Event = require("../models/Event");
 // ✅ correct import
 const { verifyToken } = require("../middleware/auth");
 
+router.get("/...", verifyToken, ...)
 // =============================
 // CREATE EVENT
 // =============================

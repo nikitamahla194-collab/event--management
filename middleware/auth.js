@@ -2,7 +2,9 @@ const express = require("express");
 const router = express.Router();
 
 // ✅ correct import
-const { verifyToken, isAdmin } = require("../middleware/auth");
+const { verifyToken } = require("../middleware/auth");
+
+router.get("/...", verifyToken, ...)
 
 // =============================
 // ADMIN ROUTE

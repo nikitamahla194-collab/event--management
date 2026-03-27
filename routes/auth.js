@@ -4,8 +4,9 @@ const User = require("../models/User");
 const bcrypt = require("bcryptjs");
 
 // ✅ IMPORT CORRECT WAY
-const { verifyToken, generateToken } = require("../middleware/auth");
+const { verifyToken } = require("../middleware/auth");
 
+router.get("/...", verifyToken, ...)
 
 // =============================
 // REGISTER USER
