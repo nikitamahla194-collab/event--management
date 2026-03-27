@@ -1,76 +1,71 @@
-const express = require('express');
+const express = require("express");
 const router = express.Router();
-const Event = require('../models/Event');
-const User = require('../models/User'); // ✅ ADD THIS
+const User = require("../models/User");
+const bcrypt = require("bcryptjs");
 
-// ✅ correct import
-const { verifyToken } = require("../middleware/auth");
+const { verifyToken, generateToken } = require("../middleware/auth");
 
-router.get("/...", verifyToken)
-
-// =============================
-// ADMIN CHECK
-// =============================
-const isAdmin = async (req, res, next) => {
+// REGISTER
+router.post("/register", async (req, res) => {
   try {
-    const user = await User.findById(req.user._id); // ✅ _id use
+    const { name, email, password } = req.body;
 
-    if (!user || user.role !== 'admin') {
-      return res.status(403).json({ error: 'Admin access required' });
+    const userExists = await User.findOne({ email });
+    if (userExists) {
+      return res.status(400).json({ message: "User already exists" });
     }
 
-    next();
+    const hashedPassword = await bcrypt.hash(password, 10);
 
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-};
+    const user = new User({
+      name,
+      email,
+      password: hashedPassword,
+    });
 
+    await user.save();
 
-// =============================
-// GET ALL EVENTS (ADMIN)
-// =============================
-router.get('/events', verifyToken, isAdmin, async (req, res) => {
-  try {
-    const events = await Event.find().populate('user', 'name email');
-    res.json(events);
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-});
-
-
-// =============================
-// UPDATE EVENT (ADMIN)
-// =============================
-router.put('/event/:id/budget', verifyToken, isAdmin, async (req, res) => {
-  try {
-    const { budgetBreakdown, description, suggestions } = req.body;
-
-    const event = await Event.findById(req.params.id);
-
-    if (!event) {
-      return res.status(404).json({ error: 'Event not found' });
-    }
-
-    event.adminResponse = {
-      budgetBreakdown,
-      description,
-      suggestions,
-      respondedAt: new Date()
-    };
-
-    event.status = 'approved';
-    event.budget = budgetBreakdown.total;
-
-    await event.save();
-
-    res.json(event);
+    res.status(201).json({ message: "User registered successfully" });
 
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 });
 
+// LOGIN
+router.post("/login", async (req, res) => {
+  try {
+    const { email, password } = req.body;
+
+    const user = await User.findOne({ email });
+    if (!user) {
+      return res.status(400).json({ message: "Invalid credentials" });
+    }
+
+    const isMatch = await bcrypt.compare(password, user.password);
+    if (!isMatch) {
+      return res.status(400).json({ message: "Invalid credentials" });
+    }
+
+    const token = generateToken(user._id);
+
+    res.json({
+      success: true,
+      token,
+      user,
+    });
+
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// PROFILE (IMPORTANT FIX)
+router.get("/profile", verifyToken, async (req, res) => {
+  res.json({
+    success: true,
+    user: req.user,
+  });
+});
 
 module.exports = router;

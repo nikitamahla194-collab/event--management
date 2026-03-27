@@ -12,8 +12,10 @@ const razorpay = new Razorpay({
   key_secret: process.env.RAZORPAY_KEY_SECRET
 });
 
+const { verifyToken } = require("../middleware/auth");
+
 // Create payment order
-router.post('/create-order/:eventId', auth, async (req, res) => {
+router.post('/create-order/:eventId', verifyToken, async (req, res) =>  {
   try {
     const event = await Event.findById(req.params.eventId);
     if (!event) {
