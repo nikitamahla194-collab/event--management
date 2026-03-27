@@ -5,7 +5,7 @@ const crypto = require('crypto');
 const Event = require('../models/Event');
 const { verifyToken } = require("../middleware/auth");
 
-router.get("/...", verifyToken, ...)
+router.get("/...", verifyToken,)
 
 const razorpay = new Razorpay({
   key_id: process.env.RAZORPAY_KEY_ID,

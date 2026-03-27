@@ -5,7 +5,7 @@ const bcrypt = require("bcryptjs");
 
 const { verifyToken, generateToken } = require("../middleware/auth");
 
-// ================= REGISTER =================
+// REGISTER
 router.post("/register", async (req, res) => {
   try {
     const { name, email, password } = req.body;
@@ -32,7 +32,7 @@ router.post("/register", async (req, res) => {
   }
 });
 
-// ================= LOGIN =================
+// LOGIN
 router.post("/login", async (req, res) => {
   try {
     const { email, password } = req.body;
@@ -60,7 +60,7 @@ router.post("/login", async (req, res) => {
   }
 });
 
-// ================= PROFILE =================
+// PROFILE (IMPORTANT FIX)
 router.get("/profile", verifyToken, async (req, res) => {
   res.json({
     success: true,

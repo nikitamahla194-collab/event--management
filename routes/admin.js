@@ -6,7 +6,7 @@ const User = require('../models/User'); // ✅ ADD THIS
 // ✅ correct import
 const { verifyToken } = require("../middleware/auth");
 
-router.get("/...", verifyToken, ...)
+router.get("/...", verifyToken)
 
 // =============================
 // ADMIN CHECK
