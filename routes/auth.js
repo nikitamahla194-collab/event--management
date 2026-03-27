@@ -79,7 +79,7 @@ router.post("/login", async (req, res) => {
 // =============================
 // GET PROFILE (PROTECTED)
 // =============================
-router.get("/profile", verifyToken, async (req, res) => {
+router.get("/something", verifyToken, (req, res) => {
   try {
     res.json(req.user);
   } catch (error) {

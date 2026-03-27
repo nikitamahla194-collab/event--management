@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const Event = require('../models/Event');
-const auth = require('../middleware/auth');
+const { verifyToken } = require("../middleware/auth");
 
 // Middleware for admin check
 const isAdmin = async (req, res, next) => {
