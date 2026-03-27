@@ -5,22 +5,19 @@ const bcrypt = require("bcryptjs");
 
 const { verifyToken, generateToken } = require("../middleware/auth");
 
-
-// =============================
-// REGISTER
-// =============================
+// ================= REGISTER =================
 router.post("/register", async (req, res) => {
   try {
     const { name, email, password } = req.body;
 
-    let user = await User.findOne({ email });
-    if (user) {
+    const userExists = await User.findOne({ email });
+    if (userExists) {
       return res.status(400).json({ message: "User already exists" });
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    user = new User({
+    const user = new User({
       name,
       email,
       password: hashedPassword,
@@ -28,17 +25,14 @@ router.post("/register", async (req, res) => {
 
     await user.save();
 
-    res.status(201).json({ message: "Registered successfully" });
+    res.status(201).json({ message: "User registered successfully" });
 
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 });
 
-
-// =============================
-// LOGIN
-// =============================
+// ================= LOGIN =================
 router.post("/login", async (req, res) => {
   try {
     const { email, password } = req.body;
@@ -56,6 +50,7 @@ router.post("/login", async (req, res) => {
     const token = generateToken(user._id);
 
     res.json({
+      success: true,
       token,
       user,
     });
@@ -65,17 +60,12 @@ router.post("/login", async (req, res) => {
   }
 });
 
-
-// =============================
-// PROFILE (PROTECTED)
-// =============================
+// ================= PROFILE =================
 router.get("/profile", verifyToken, async (req, res) => {
-  try {
-    res.json(req.user);
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
+  res.json({
+    success: true,
+    user: req.user,
+  });
 });
-
 
 module.exports = router;
